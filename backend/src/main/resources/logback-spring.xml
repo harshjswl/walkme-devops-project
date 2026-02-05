@@ -1,0 +1,29 @@
+<configuration>
+
+    <property name="SERVICE_NAME" value="walkme-backend"/>
+    <property name="ENVIRONMENT" value="local"/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <fieldNames>
+                <timestamp>timestamp</timestamp>
+                <level>level</level>
+                <logger>logger</logger>
+                <thread>thread</thread>
+                <message>message</message>
+            </fieldNames>
+
+            <customFields>
+                {
+                "service":"${SERVICE_NAME}",
+                "environment":"${ENVIRONMENT}"
+                }
+            </customFields>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+</configuration>
