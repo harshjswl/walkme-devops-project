@@ -8,6 +8,9 @@ resource "aws_vpc" "this" {
   }
 }
 
+# ==============================
+# Internet Gateway
+# ==============================
 resource "aws_internet_gateway" "this" {
   vpc_id = aws_vpc.this.id
 
@@ -16,6 +19,9 @@ resource "aws_internet_gateway" "this" {
   }
 }
 
+# ==============================
+# Public Subnets
+# ==============================
 resource "aws_subnet" "public" {
   count                   = length(var.public_subnets)
   vpc_id                  = aws_vpc.this.id
@@ -24,12 +30,19 @@ resource "aws_subnet" "public" {
   map_public_ip_on_launch = true
 
   tags = {
-    Name                            = "${var.name}-public-${count.index}"
-    "kubernetes.io/role/elb"        = "1"
-    "kubernetes.io/cluster/walkme"  = "shared"
+    Name = "${var.name}-public-${count.index}"
+
+    # REQUIRED for AWS LoadBalancer
+    "kubernetes.io/role/elb" = "1"
+
+    # MUST match EKS cluster name
+    "kubernetes.io/cluster/walkme-dev" = "shared"
   }
 }
 
+# ==============================
+# Private Subnets
+# ==============================
 resource "aws_subnet" "private" {
   count             = length(var.private_subnets)
   vpc_id            = aws_vpc.this.id
@@ -37,9 +50,12 @@ resource "aws_subnet" "private" {
   availability_zone = var.availability_zones[count.index]
 
   tags = {
-    Name                                   = "${var.name}-private-${count.index}"
-    "kubernetes.io/role/internal-elb"      = "1"
-    "kubernetes.io/cluster/walkme" = "shared"
+    Name = "${var.name}-private-${count.index}"
 
+    # Required for internal LB
+    "kubernetes.io/role/internal-elb" = "1"
+
+    # MUST match EKS cluster name
+    "kubernetes.io/cluster/walkme-dev" = "shared"
   }
 }
